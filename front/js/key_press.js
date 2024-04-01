@@ -10,25 +10,29 @@ import "./jquery-3.7.1.min.js"
 
 class KeyPress {
     constructor () {
-        func_list = [];
+        this.func_list = [];
     }
 
     add_element(name, func) {
-        func_list.push({name, func});
-        this.reload();
+        this.func_list.push({name, func});
+        $(document).on('keypress',function(event){
+            self.run_all(event);
+        });
     }
 
+
     reload() {
+        let self = this;
         $(document).off('keypress',function(event){
-            this.run_all(event);
+            self.run_all(event);
         });
         $(document).on('keypress',function(event){
-            this.run_all(event);
+            self.run_all(event);
         });
     }
 
     run_all(event) {
-        for(const element of func_list) {
+        for(const element of this.func_list) {
             element['func'](event)
         }
     }

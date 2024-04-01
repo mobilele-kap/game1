@@ -1,4 +1,5 @@
 import "./jquery-3.7.1.min.js"
+import Action from "./scenes/Action.js";
 
 class Start {
     constructor ({call_end}) {
@@ -38,16 +39,16 @@ class Menu {
     }
 }
 
-class Action {
-    constructor ({call_end}) {
-    }
-    render() {
-        $("#scene").html('<div id="action">action</div>');
-    }
-    start() {
-        this.render();
-    }
-}
+// class Action {
+//     constructor ({call_end}) {
+//     }
+//     render() {
+//         $("#scene").html('<div id="action">action</div>');
+//     }
+//     start() {
+//         this.render();
+//     }
+// }
 
 class Result {
     constructor ({call_end}) {
