@@ -1,4 +1,5 @@
 import "./jquery-3.7.1.min.js"
+import compare_key from "./scripts/compare_key.js";
 
 //function add_keypress_event(func) {
 //    document.addEventListener('keypress', function(event){
@@ -7,33 +8,32 @@ import "./jquery-3.7.1.min.js"
 //    });
 //}
 
-
 class KeyPress {
     constructor () {
         this.func_list = [];
+        this.add_event_keypress();
+    }
+
+    add_event_keypress() {
+        $(document).on('keypress',function(event){
+            self.run_all(event);
+        });
     }
 
     add_element(name, func) {
         this.func_list.push({name, func});
-        $(document).on('keypress',function(event){
-            self.run_all(event);
-        });
     }
 
-
-    reload() {
-        let self = this;
-        $(document).off('keypress',function(event){
-            self.run_all(event);
-        });
-        $(document).on('keypress',function(event){
-            self.run_all(event);
-        });
+    del_element(name) {
+        this.func_list = this.func_list.filter((row) => row['name'] !== name)
     }
 
     run_all(event) {
         for(const element of this.func_list) {
-            element['func'](event)
+            const key = event.key;
+            const code = event.code;
+            const bt = compare_key(key)
+            element['func'] && element['func']({bt, code, key});
         }
     }
 }
