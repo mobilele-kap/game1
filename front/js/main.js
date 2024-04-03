@@ -1,11 +1,12 @@
 import './jquery-3.7.1.min.js'
-import {Start, Menu, Action, Result, Scenes} from './scenes.js'
+import key_press_obj from "./key_press.js";
+import {Start, Action, Result, Scenes} from './scenes.js'
 
-var scenes_obj = new Scenes({scenes:[Start, Menu, Action, Result]});
-
-
+const scenes_obj = new Scenes({scenes:[Start, Action, Result]});
 
 $(document).ready(function () {
+    $('body').css({'margin': 0})
+
     scenes_obj.next_scene()
     console.log('1111')
 

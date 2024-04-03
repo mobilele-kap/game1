@@ -15,8 +15,10 @@ class KeyPress {
     }
 
     add_event_keypress() {
+        let self = this;
         $(document).on('keypress',function(event){
             self.run_all(event);
+            console.log(event.key);
         });
     }
 
@@ -38,9 +40,6 @@ class KeyPress {
     }
 }
 
+const key_press_obj = new KeyPress();
 
-
-//eel.expose(say_hello_js); // Expose this function to Python
-//function say_hello_js(x) {
-//    console.log("Hello from " + x);
-//}
+export default key_press_obj

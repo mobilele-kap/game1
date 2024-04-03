@@ -1,54 +1,34 @@
 import "./jquery-3.7.1.min.js"
 import Action from "./scenes/Action.js";
+import Start from "./scenes/Start.js"
 
-class Start {
-    constructor ({call_end}) {
-    this.call_end = call_end;
-    this.event_end = null;
-    }
-    render() {
-        $("#scene").html('<div id="start">start</div>');
-    }
-    stop() {
-        console.log(2);
-        this.call_end && this.call_end();
-        delete this.event_end;
-    }
-    start() {
-        this.render();
-        const stop = () => (this.stop())
-        $(document).on('keypress',function(event){
-            if (event.key == 0) {
-
-                console.log(1);
-                stop()
-            }
-        });
-    }
-
-}
-
-class Menu {
-    constructor ({call_end}) {
-    }
-    render() {
-        $("#scene").html('<div id="menu">menu</div>');
-    }
-    start() {
-        this.render();
-    }
-}
-
-// class Action {
+// class Start {
 //     constructor ({call_end}) {
+//     this.call_end = call_end;
+//     this.event_end = null;
 //     }
 //     render() {
-//         $("#scene").html('<div id="action">action</div>');
+//         $("#scene").html('<div id="start">start</div>');
+//     }
+//     stop() {
+//         console.log(2);
+//         this.call_end && this.call_end();
+//         delete this.event_end;
 //     }
 //     start() {
 //         this.render();
+//         const stop = () => (this.stop())
+//         $(document).on('keypress',function(event){
+//             if (event.key == 0) {
+//
+//                 console.log(1);
+//                 stop()
+//             }
+//         });
 //     }
+//
 // }
+
 
 class Result {
     constructor ({call_end}) {
@@ -92,4 +72,4 @@ class Scenes {
 
 }
 
-export {Start, Menu, Action, Result, Scenes}
+export {Start, Action, Result, Scenes}

@@ -1,7 +1,9 @@
 import '../jquery-3.7.1.min.js'
-import {action_lvl1_delay_quest, action_lvl2_delay_quest, action_lvl3_delay_quest, action_stop_delay} from '../config.js'
+import {action_delay_quest, action_stop_delay} from '../config.js'
 import {get_random_int_range} from "../scripts/random.js";
-import compare_key from "../scripts/compare_key.js";
+import key_press_obj from "../key_press.js";
+
+
 
 const key_num_dict = {
     'bt1': 1,
@@ -13,43 +15,48 @@ const key_num_dict = {
 }
 
 class Action {
-    constructor ({call_end, lvl}) {
+    constructor ({call_end}) {
+        this.action_history = [];
         this.call_end = call_end;
         this.score = 0;
-        this.miss = 0;
         this.purpose = null;
         // Выбор задержки:
-        switch(lvl) {
-            case 1:
-                this.delay_quest = action_lvl1_delay_quest;
-                break;
-            case 2:
-                this.delay_quest = action_lvl2_delay_quest;
-                break;
-            case 3:
-                this.delay_quest = action_lvl3_delay_quest;
-                break;
-            default:
-                this.delay_quest = 10;
-                break;
-        }
+        this.delay_quest = action_delay_quest;
         this.delay_quest_timer = null;
-        this.timmer_stop = null;
+        this.quest_start_time_ms = 0
 
+        this.css_state_rest = {
+            "background-color": "#6C8CD5",
+            "border": "solid 1vh #1240AB",
+        }
+        this.css_state_active = {
+            "background-color": "#FFD973",
+            "border": "solid 1vh #FF4040",
+        }
     }
 
     render() {
+        //
+        // const windowInnerWidth = window.innerWidth
+        // const windowInnerHeight = window.innerHeight
+
         $("#scene").html(
             `<div id="action">
                 <div id="action-field-container">
                     <div id="action-field-title">Название</div>
                     <div id="action-field">
-                        <div class="purpose" id="purpose_1" ></div>
-                        <div class="purpose" id="purpose_2" ></div>
-                        <div class="purpose" id="purpose_3" ></div>
-                        <div class="purpose" id="purpose_4" ></div>
-                        <div class="purpose" id="purpose_5" ></div>
-                        <div class="purpose" id="purpose_6" ></div>
+                        <div class="action-line-1">
+                            <div class="purpose-normal purpose" id="purpose_3" ></div>
+                            <div class="purpose-normal purpose" id="purpose_4" ></div>
+                        </div>
+                        <div class="action-line-2">
+                            <div class="purpose-normal purpose" id="purpose_2" ></div>
+                            <div class="purpose-normal purpose" id="purpose_5" ></div>
+                        </div>
+                        <div class="action-line-3">
+                            <div class="purpose-normal purpose" id="purpose_1" ></div>
+                            <div class="purpose-normal purpose" id="purpose_6" ></div>
+                        </div>
                         <div id="info-action-container">
                             <div id="time_container"></div>
                             <div class="mini-logo"></div>
@@ -59,45 +66,85 @@ class Action {
                 </div>
             </div>`
         );
+        $(".action-line-1").css({
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            'height': "33.3%"
+        });
+
+        $(".action-line-2").css({
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            'height': "33.3%"
+        });
+
+        $(".action-line-3").css({
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            'height': "33.3%"
+        });
+
         $("#action").css({
             "background-color": "red",
-            "width": "100%",
-            "height": "100%",
+            "width": "100vw",
+            "height": "100vh",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            // "padding-left": '5vw',
+            // "padding-right": '5vw',
+            // "padding-button": '5vh',
         });
-        $(".purpose").css({
-            "background-color": "blue",
-            "width": "10%",
-            "height": "3%",
-            "border": "solid 1px #1437AD"
+        $("#action-field-container").css({
+            "width": "88vw",
+            "height": "88vh",
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "center",
+            "justify-content": "center",
+        });
+        $("#action-field").css({
+            "background-color": "white",
+            "width": "85vw",
+            "height": "85vh",
+            "position": "relative",
+        });
+        $(".purpose-normal").css({
+            "width": "20vw",
+            "height": "5vh",
+        });
+        $(".purpose-90").css({
+            "width": "5%",
+            "height": "90%",
+        });
+        $(".purpose").css(this.css_state_rest);
+        $(".purpose").css(this.css_state_rest);
+
+
+
+        $("#purpose_2").css({
+            "transform": "rotate(135deg)",
+            "margin-right": "auto",
+        });
+        $("#purpose_5").css({"transform": "rotate(45deg)"});
+
+
+        $("#purpose_1").css({
+            "margin-right": "auto",
+            "margin-left": "calc(0 - 20vw + 20vw/2)",
+            "transform": "rotate(90deg)",
+        });
+        $("#purpose_6").css({
+            "transform": "rotate(90deg)",
         });
     }
 
-
-    add_event_key() {
-        // Начать считывать нажатия на кнопки:
-        let self = this;
-        $(document).on('keypress', self.handler_event_key);
-    }
-
-    del_event_key() {
-        // Закончить считывать нажатия на кнопки:
-        let self = this;
-        $(document).off('keypress', self.handler_event_key);
-    }
-
-    add_stop_timer() {
-        let self = this
-        // Запустить займер остановки:
-        this.timmer_stop = setTimeout(function () {
-            self.stop();
-        }, action_stop_delay);
-
-    }
-
-    handler_event_key (event) {
+    handler_event_key ({bt}) {
         // Обработчик нажатия клавишь:
-        console.log(`KeyboardEvent: key='${event.key}' | code='${event.code}'`);
-        const bt = compare_key(event.key);
+        console.log(`KeyboardEvent: ${bt}`);
         if (bt) {
             const bt_num = key_num_dict[bt]
             bt_num && this.handler_hit({bt_num});
@@ -111,11 +158,10 @@ class Action {
         // Изменить счет:
         if (is_hit) {
             this.add_score(1);
-        } else {
-            this.add_miss(1);
         }
         // Изменить цель:
         if (is_hit) {
+            this.action_history.push({type: 'hit', wait_time: Date.now() - this.quest_start_time_ms})
             this.new_purpose();
         }
     }
@@ -131,6 +177,7 @@ class Action {
         }
         // Очистить если есть:
         this.delay_quest_timer && clearTimeout(this.delay_quest_timer);
+        this.quest_start_time_ms = Date.now();
         // Запустить таймер:
         let self = this;
         this.delay_quest_timer = setTimeout(function () {
@@ -153,23 +200,23 @@ class Action {
         }
     }
 
-    add_miss(num) {
-        // добавить промах:
-        this.miss += num;
-    }
-
     start() {
         // Отрисовать HTML
         this.render();
+        // Тут должна быть анимация:
+        // Начать:
+        this.start_action();
+    }
+
+    start_action() {
         // Добавить событе на кнопку:
-        this.add_event_key();
+        key_press_obj.add_element('Action', (event)=>(this.handler_event_key(event)))
         // Ноавя цель:
         this.new_purpose();
-        this.add_stop_timer();
     }
 
     stop () {
-        this.del_event_key();
+        key_press_obj.del_element('Action');
         this.delay_quest_timer && clearTimeout(this.delay_quest_timer);
         this.call_end && this.call_end();
     }
