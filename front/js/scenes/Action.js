@@ -1,7 +1,8 @@
 import '../jquery-3.7.1.min.js'
-import {action_delay_quest, action_stop_delay} from '../config.js'
+import {action_delay_quest, count_quest} from '../config.js'
 import {get_random_int_range} from "../scripts/random.js";
 import key_press_obj from "../key_press.js";
+import {max_data, min_data} from "../scripts/data_record.js";
 
 const key_num_dict = {
     'bt1': 1,
@@ -28,8 +29,8 @@ class Action {
         this.score = 0;                         // количества очков
         this.purpose = null;                    // Текущея цель
         this.delay_quest = action_delay_quest;  // Задержка до конца квеста
-        this.delay_quest_timer = null;          // Таймер для конца квеста
-        this.interval_timer = null;             //Интервал для подсчета времени
+        this.interval_timer = null;             // Интервал для подсчета времени
+        this.interval_quest_end = null;         // Интервал для отцета конца квеста
         this.quest_start_time_ms = 0;            //Время начала квеста
         this.start_time_action = 0;             // Начала ативности
         this.passed_time = 0;                   // Время игры
@@ -82,11 +83,31 @@ class Action {
                                 </div>
                             </div>
                         </div>
-
+                        <div id="quest_time_box">
+                            <span id="quest_time"></span>
+                        </div>
                     </div>
                 </div>
             </div>`
         );
+
+        $("#quest_time_box").css({
+            "position": "absolute",
+            "border-radius": "10vh 10vh 0 0",
+            "background-color": "red",
+            "height": "10vh",
+            "width": "10vw",
+            "z-index": "10",
+            "top": "74vh",
+            "left": "37.5vw",
+            "display": "flex",
+            "justify-content": "center",
+            "align-items": "center",
+            "font-family": "Brusnika",
+            "font-size": "8vh",
+            "color": "#fffffa",
+            "padding": "1vh",
+        })
 
         $("#info-action-container").css({
             "display": "flex",
@@ -254,16 +275,25 @@ class Action {
             }
         }
         // Очистить если есть:
-        this.delay_quest_timer && clearTimeout(this.delay_quest_timer);
+        this.interval_quest_end && clearInterval(this.interval_quest_end);
         this.quest_start_time_ms = Date.now();
         // Поменять цвет:
         $(key_css_button[old_purpose]).css(this.css_state_inactive);
         $(key_css_button[this.purpose]).css(this.css_state_active);
         // Запустить таймер:
+        this.start_interval_quest();
+    }
+
+    start_interval_quest() {
         let self = this;
-        this.delay_quest_timer = setTimeout(function () {
-            self.new_purpose();
-        }, self.delay_quest);
+        this.interval_quest_end = setInterval(function () {
+            if (Date.now()-self.quest_start_time_ms > self.delay_quest) {
+                //Что делать если закончилось время:
+                self.stop(self.get_statistics(false));
+            } else {
+                $("#quest_time").text(Math.floor((self.delay_quest-(Date.now()-self.quest_start_time_ms))/1000)+1);
+            }
+        }, 200)
     }
 
     check_hit(button_num) {
@@ -279,7 +309,11 @@ class Action {
         } else {
             this.score = 0;
         }
-        $("#count_score").text(this.score);
+        if (this.score >= count_quest) {   // Если количество попадание совпало
+            this.stop(this.get_statistics(true));
+        }  else {
+            $("#count_score").text(this.score);
+        }
     }
 
     start() {
@@ -307,11 +341,21 @@ class Action {
         this.new_purpose();
     }
 
-    stop () {
+    get_statistics(is_win) {
+        let self = this;
+        return {
+            is_win,
+            game_time: (Date.now() - self.start_time_action),
+            avg_time: (Date.now() - self.start_time_action) / count_quest,
+            top_time: max_data(self.action_history.filter(({type})=>type==='hit'), 'wait_time'),
+        }
+    }
+    stop (statistics) {
+        let self = this;
         key_press_obj.del_element('Action');
-        this.delay_quest_timer && clearTimeout(this.delay_quest_timer);
-        this.interval_timer && clearInterval(this.interval_timer);
-        this.call_end && this.call_3end();
+        self.interval_timer && clearInterval(self.interval_timer);
+        self.interval_quest_end && clearInterval(self.interval_quest_end);
+        self.call_end && self.call_end(statistics);
     }
 }
 

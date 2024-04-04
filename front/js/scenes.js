@@ -1,33 +1,5 @@
 import "./jquery-3.7.1.min.js"
-import Action from "./scenes/Action.js";
-import Start from "./scenes/Start.js"
 
-// class Start {
-//     constructor ({call_end}) {
-//     this.call_end = call_end;
-//     this.event_end = null;
-//     }
-//     render() {
-//         $("#scene").html('<div id="start">start</div>');
-//     }
-//     stop() {
-//         console.log(2);
-//         this.call_end && this.call_end();
-//         delete this.event_end;
-//     }
-//     start() {
-//         this.render();
-//         const stop = () => (this.stop())
-//         $(document).on('keypress',function(event){
-//             if (event.key == 0) {
-//
-//                 console.log(1);
-//                 stop()
-//             }
-//         });
-//     }
-//
-// }
 
 
 class Result {
@@ -60,11 +32,11 @@ class Scenes {
     this.scenes_generator = next_element(scenes);
     }
 
-    next_scene() {
+    next_scene(result) {
         const scene_data = this.scenes_generator.next();
-        console.log(this.scenes)
+        console.log("result", result)
         console.log(scene_data)
-        this.current_scenes_obj = new scene_data["value"]["scene"]({call_end: ()=>(this.next_scene())});
+        this.current_scenes_obj = new scene_data["value"]["scene"]({old_result: result, call_end: (end_result)=>(this.next_scene(end_result))});
         this.current_scenes_number = scene_data["value"]["scene_number"];
         this.current_scenes_obj.start();
     }
@@ -72,4 +44,4 @@ class Scenes {
 
 }
 
-export {Start, Action, Result, Scenes}
+export {Scenes}
