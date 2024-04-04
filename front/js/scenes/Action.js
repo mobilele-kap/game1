@@ -3,8 +3,6 @@ import {action_delay_quest, action_stop_delay} from '../config.js'
 import {get_random_int_range} from "../scripts/random.js";
 import key_press_obj from "../key_press.js";
 
-
-
 const key_num_dict = {
     'bt1': 1,
     'bt2': 2,
@@ -14,36 +12,43 @@ const key_num_dict = {
     'bt6': 6,
 }
 
+const key_css_button = {
+    1: '#purpose_1',
+    2: '#purpose_2',
+    3: '#purpose_3',
+    4: '#purpose_4',
+    5: '#purpose_5',
+    6: '#purpose_6',
+}
+
 class Action {
     constructor ({call_end}) {
-        this.action_history = [];
-        this.call_end = call_end;
-        this.score = 0;
-        this.purpose = null;
-        // Выбор задержки:
-        this.delay_quest = action_delay_quest;
-        this.delay_quest_timer = null;
-        this.quest_start_time_ms = 0
-
-        this.css_state_rest = {
-            "background-color": "#6C8CD5",
-            "border": "solid 1vh #1240AB",
-        }
+        this.action_history = [];               // Таблица историй ударов
+        this.call_end = call_end;               //Функция для остановки
+        this.score = 0;                         // количества очков
+        this.purpose = null;                    // Текущея цель
+        this.delay_quest = action_delay_quest;  // Задержка до конца квеста
+        this.delay_quest_timer = null;          // Таймер для конца квеста
+        this.interval_timer = null;             //Интервал для подсчета времени
+        this.quest_start_time_ms = 0;            //Время начала квеста
+        this.start_time_action = 0;             // Начала ативности
+        this.passed_time = 0;                   // Время игры
         this.css_state_active = {
+            "background-color": "#7bf57d",
+            "border": "solid 1vh #2f2e2e",
+        }
+        this.css_state_inactive = {
             "background-color": "#FFD973",
             "border": "solid 1vh #FF4040",
         }
     }
 
     render() {
-        //
-        // const windowInnerWidth = window.innerWidth
-        // const windowInnerHeight = window.innerHeight
 
         $("#scene").html(
             `<div id="action">
                 <div id="action-field-container">
-                    <div id="action-field-title">Название</div>
+                    <div id="action-field-title"><span>Дай Пас!</span></div>
                     <div id="action-field">
                         <div class="action-line-1">
                             <div class="purpose-normal purpose" id="purpose_3" ></div>
@@ -56,35 +61,101 @@ class Action {
                         <div class="action-line-3">
                             <div class="purpose-normal purpose" id="purpose_1" ></div>
                             <div class="purpose-normal purpose" id="purpose_6" ></div>
+                            
+                            <div id="info-action-container">
+                                <div id="time_container">
+                                    <div class="time_block">
+                                        <span>Время</span>
+                                    </div>
+                                    <div class="time_block">
+                                        <span id="count_time">0</span>
+                                    </div>
+                                </div>
+                                <div class="mini-logo"></div>
+                                <div id="score_container">
+                                    <div class="score_block">
+                                        <span>Балы</span>
+                                    </div>
+                                    <div class="score_block">
+                                        <span id="count_score">0</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div id="info-action-container">
-                            <div id="time_container"></div>
-                            <div class="mini-logo"></div>
-                            <div id="score_container"></div>
-                        </div>
+
                     </div>
                 </div>
             </div>`
         );
+
+        $("#info-action-container").css({
+            "display": "flex",
+        });
+
+        $("#time_container").css({
+            "display": "flex",
+            "flex-direction": "column",
+            "justify-content": "center",
+            "height": "20vh",
+            "width": "15vw",
+            "border": "solid 3px #d3c1c8",
+            "border-radius": "2vh",
+        });
+        $("#score_container").css({
+            "margin-left": "1vh",
+            "display": "flex",
+            "flex-direction": "column",
+            "justify-content": "center",
+            "height": "20vh",
+            "width": "15vw",
+            "border": "solid 3px #d3c1c8",
+            "border-radius": "2vh",
+        });
+
+        $(".score_block").css({
+            "height": "50%",
+            "font-size": "8vh",
+            "font-family": "Brusnika",
+            "display": "flex",
+            "justify-content": "center",
+            "align-items": "center",
+        });
+        $(".time_block").css({
+            "height": "50%",
+            "font-size": "8vh",
+            "font-family": "Brusnika",
+            "display": "flex",
+            "justify-content": "center",
+            "align-items": "center",
+        });
+
+        $("#action-field-title").css({
+            "color": "#fffffa",
+            "font-size": "9vh",
+            "font-family": "Brusnika",
+            "height": "10vh",
+        });
+
         $(".action-line-1").css({
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
-            'height': "33.3%"
+            'height': "16.0%"
         });
 
         $(".action-line-2").css({
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
-            'height': "33.3%"
+            'height': "25%"
         });
 
         $(".action-line-3").css({
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
-            'height': "33.3%"
+            'height': "59%",
+            "position": "relative",
         });
 
         $("#action").css({
@@ -94,13 +165,10 @@ class Action {
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
-            // "padding-left": '5vw',
-            // "padding-right": '5vw',
-            // "padding-button": '5vh',
         });
         $("#action-field-container").css({
             "width": "88vw",
-            "height": "88vh",
+            "height": "93vh",
             "display": "flex",
             "flex-direction": "column",
             "align-items": "center",
@@ -111,6 +179,8 @@ class Action {
             "width": "85vw",
             "height": "85vh",
             "position": "relative",
+            "border-radius": "3px",
+            "clip-path": "polygon(22% 0, 78% 0, 100% 41%, 100% 100%, 0 100%, 0 41%)",
         });
         $(".purpose-normal").css({
             "width": "20vw",
@@ -120,10 +190,12 @@ class Action {
             "width": "5%",
             "height": "90%",
         });
-        $(".purpose").css(this.css_state_rest);
-        $(".purpose").css(this.css_state_rest);
 
-
+        $("#purpose_3").css({
+            "margin-right": "2vw",
+        });
+        $("#purpose_4").css({
+        });
 
         $("#purpose_2").css({
             "transform": "rotate(135deg)",
@@ -131,15 +203,20 @@ class Action {
         });
         $("#purpose_5").css({"transform": "rotate(45deg)"});
 
-
         $("#purpose_1").css({
-            "margin-right": "auto",
-            "margin-left": "calc(0 - 20vw + 20vw/2)",
             "transform": "rotate(90deg)",
+            "position": "absolute",
+            "left": "-6.8vw",
+            "top": "24vh",
         });
         $("#purpose_6").css({
             "transform": "rotate(90deg)",
+            "position": "absolute",
+            "left": "71vw",
+            "top": "24vh",
         });
+
+        $(".purpose").css(this.css_state_inactive);
     }
 
     handler_event_key ({bt}) {
@@ -168,6 +245,7 @@ class Action {
 
     new_purpose() {
         // Новое значение цели:
+        const old_purpose = this.purpose;
         while (true) {
             const new_purpose = get_random_int_range(1,6);
             if (this.purpose !== new_purpose) {
@@ -178,6 +256,9 @@ class Action {
         // Очистить если есть:
         this.delay_quest_timer && clearTimeout(this.delay_quest_timer);
         this.quest_start_time_ms = Date.now();
+        // Поменять цвет:
+        $(key_css_button[old_purpose]).css(this.css_state_inactive);
+        $(key_css_button[this.purpose]).css(this.css_state_active);
         // Запустить таймер:
         let self = this;
         this.delay_quest_timer = setTimeout(function () {
@@ -198,6 +279,7 @@ class Action {
         } else {
             this.score = 0;
         }
+        $("#count_score").text(this.score);
     }
 
     start() {
@@ -208,9 +290,19 @@ class Action {
         this.start_action();
     }
 
+    start_timer() {
+        let self = this;
+        this.interval_timer = setInterval(()=>{
+            self.passed_time = Date.now() - self.start_time_action;
+            $("#count_time").text((self.passed_time/1000).toFixed(2));
+        }, 63);
+    }
+
     start_action() {
         // Добавить событе на кнопку:
         key_press_obj.add_element('Action', (event)=>(this.handler_event_key(event)))
+        this.start_time_action = Date.now();
+        this.start_timer()
         // Ноавя цель:
         this.new_purpose();
     }
@@ -218,7 +310,8 @@ class Action {
     stop () {
         key_press_obj.del_element('Action');
         this.delay_quest_timer && clearTimeout(this.delay_quest_timer);
-        this.call_end && this.call_end();
+        this.interval_timer && clearInterval(this.interval_timer);
+        this.call_end && this.call_3end();
     }
 }
 

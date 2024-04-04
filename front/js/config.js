@@ -1,4 +1,4 @@
-const action_delay_quest = 15000;  //мс
+const action_delay_quest = 20000;  //мс
 const action_stop_delay = 60000;  //мс
 // Управление:
 const button_1 = '1';
