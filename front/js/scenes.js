@@ -36,6 +36,9 @@ class Scenes {
         const scene_data = this.scenes_generator.next();
         console.log("result", result)
         console.log(scene_data)
+        if (this.current_scenes_obj) {
+            delete this.current_scenes_obj
+        }
         this.current_scenes_obj = new scene_data["value"]["scene"]({old_result: result, call_end: (end_result)=>(this.next_scene(end_result))});
         this.current_scenes_number = scene_data["value"]["scene_number"];
         this.current_scenes_obj.start();

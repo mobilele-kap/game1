@@ -1,5 +1,5 @@
 import '../jquery-3.7.1.min.js'
-import {action_delay_quest, count_quest} from '../config.js'
+import {action_delay_quest, count_quest, action_start_delay} from '../config.js'
 import {get_random_int_range} from "../scripts/random.js";
 import key_press_obj from "../key_press.js";
 import {max_data, min_data} from "../scripts/data_record.js";
@@ -51,6 +51,9 @@ class Action {
                 <div id="action-field-container">
                     <div id="action-field-title"><span>Дай Пас!</span></div>
                     <div id="action-field">
+                        <div id="timer-start-box">
+                            <span id="timer-start"></span>
+                        </div>
                         <div class="action-line-1">
                             <div class="purpose-normal purpose" id="purpose_3" ></div>
                             <div class="purpose-normal purpose" id="purpose_4" ></div>
@@ -90,6 +93,24 @@ class Action {
                 </div>
             </div>`
         );
+
+        $("#timer-start-box").css({
+            "height": "20vh",
+            "width": "20vh",
+            "border": "solid 1vh #fffffa",
+            "border-radius": "10vh",
+            "color": "#fffffa",
+            "font-family": "Brusnika",
+            "font-size": "10vh",
+            "background-color": "rgba(255,0,0,0.7)",
+            "display": "flex",
+            "justify-content": "center",
+            "align-items": "center",
+            "position": "absolute",
+            "top": "32.5vh",
+            "left": "36.5vw",
+            "z-index": "15",
+        });
 
         $("#quest_time_box").css({
             "position": "absolute",
@@ -253,14 +274,21 @@ class Action {
     handler_hit({bt_num}) {
         // Проверить попадания:
         const is_hit = this.check_hit(bt_num);
-        // Изменить счет:
+
         if (is_hit) {
-            this.add_score(1);
-        }
-        // Изменить цель:
-        if (is_hit) {
+            // Изменить счет:
             this.action_history.push({type: 'hit', wait_time: Date.now() - this.quest_start_time_ms})
-            this.new_purpose();
+            this.add_score(1);
+            //Проверить условия конца:
+            if (this.score >= count_quest) {   // Если количество попадание совпало
+                this.stop(this.get_statistics(true));
+            }  else {
+                $("#count_score").text(this.score);
+                // Изменить цель:
+                this.new_purpose();
+            }
+        } else {
+            this.action_history.push({type: 'miss', wait_time: Date.now() - this.quest_start_time_ms})
         }
     }
 
@@ -309,11 +337,31 @@ class Action {
         } else {
             this.score = 0;
         }
-        if (this.score >= count_quest) {   // Если количество попадание совпало
-            this.stop(this.get_statistics(true));
-        }  else {
-            $("#count_score").text(this.score);
-        }
+    }
+
+    start_counting_down() {
+        //Отсчет времени
+        let self = this
+        let count_sec = action_start_delay/1000;
+        $("#timer-start").text(count_sec);
+        let start_counting_down_timer = setInterval(function () {
+            count_sec -= 1;
+            if (count_sec <= 0) {
+                self.start_action();
+                $("#timer-start-box").hide();
+                clearInterval(start_counting_down_timer);
+            } else {
+                if (count_sec <= 1) {
+                    $("#timer-start").text("GO");
+                } else {
+                    $("#timer-start").text(count_sec);
+                    $("#timer-start").css({"opacity": "0"});
+                    $("#timer-start").animate({"opacity": "1"});
+                }
+
+            }
+        }, 1000)
+
     }
 
     start() {
@@ -321,7 +369,7 @@ class Action {
         this.render();
         // Тут должна быть анимация:
         // Начать:
-        this.start_action();
+        this.start_counting_down();
     }
 
     start_timer() {
@@ -343,11 +391,15 @@ class Action {
 
     get_statistics(is_win) {
         let self = this;
+        const count_hit = self.action_history.filter(({type})=>type==='hit').length;
+        const count_miss = self.action_history.filter(({type})=>type==='miss').length;
         return {
             is_win,
             game_time: (Date.now() - self.start_time_action),
-            avg_time: (Date.now() - self.start_time_action) / count_quest,
-            top_time: max_data(self.action_history.filter(({type})=>type==='hit'), 'wait_time'),
+            avg_time: (Date.now() - self.start_time_action) / this.score,
+            top_time: min_data(self.action_history.filter(({type})=>type==='hit'), 'wait_time'),
+            worst_time: max_data(self.action_history.filter(({type})=>type==='hit'), 'wait_time'),
+            accuracy: count_hit/(count_hit+count_miss)
         }
     }
     stop (statistics) {

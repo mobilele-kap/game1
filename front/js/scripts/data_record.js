@@ -12,11 +12,13 @@ function max_data(data_record, colum_name) {
 function min_data(data_record, colum_name) {
     let value;
     for(const row of data_record) {
-        if (row[colum_name] > value || !value) {
+        if (row[colum_name] < value || !value) {
             value = row[colum_name];
         }
     }
     return value
 }
+
+
 
 export {max_data, min_data}

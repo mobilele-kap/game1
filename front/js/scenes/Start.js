@@ -24,6 +24,7 @@ class Start {
             "background-image": "url(js/scenes/img/fon.png)",
             "width": "100vw",
             "height": "100vh",
+            "background-size": "100%",
         });
         $("#action-field-container").css({
             "background-color": "white",
