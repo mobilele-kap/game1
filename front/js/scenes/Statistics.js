@@ -1,6 +1,12 @@
 import '../jquery-3.7.1.min.js'
 import key_press_obj from "../key_press.js";
-import {statistic_delay_exit} from "../config.js"
+import {
+    statistic_delay_exit,
+    victory_statistic_path,
+    defeat_statistic_path,
+    sound_statistic_path,
+} from "../config.js"
+import "../howler.js"
 
 const key_num_array = ['bt1','bt2','bt3','bt4','bt5','bt6'];
 
@@ -19,6 +25,7 @@ class Statistics {
         this.old_result = old_result;
         this.interval_exit = null;
         this.start_time_ms = 0;
+        this.sound_timeout = null;
     }
 
     render() {
@@ -147,11 +154,30 @@ class Statistics {
                 $("#statistics-exit-time").text(((statistic_delay_exit - (Date.now() - self.start_time_ms))/1000).toFixed(0));
             }
         }, 500);
+        this.sound_start();
+    }
+
+    sound_start() {
+        if (this.old_result.is_win) {
+            let sound = new Howl({
+                src: [victory_statistic_path], autoplay: true,
+            });
+        } else {
+            let sound = new Howl({
+                src: [defeat_statistic_path], autoplay: true,
+            });
+        }
+        this.sound_timeout = setTimeout(function () {
+            let sound = new Howl({
+                src: [sound_statistic_path], autoplay: true, loop: true
+            });
+        }, 1000)
     }
 
     stop() {
         key_press_obj.del_element('Start');
         this.interval_exit && clearInterval(this.interval_exit);
+        this.sound_timeout && clearTimeout(this.sound_timeout);
         document.location.reload();
         // this.call_end && this.call_end();
     }

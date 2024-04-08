@@ -18,6 +18,6 @@ if __name__ == '__main__':
     eel.init('front')
     t1 = threading.Thread(target=test, daemon=True)
     t1.start()
-    eel.start('index.html', mode="chrome", size=(700, 411))
     # eel.browsers.set_path("chrome", "./chrome-win/chrome.exe")
+    eel.start('index.html', mode="chrome", size=(700, 411), cmdline_args=['--autoplay-policy=no-user-gesture-required'])
     # eel.start('index.html', mode='chrome', cmdline_args=['--kiosk'])

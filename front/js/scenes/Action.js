@@ -1,8 +1,10 @@
 import '../jquery-3.7.1.min.js'
-import {action_delay_quest, count_quest, action_start_delay} from '../config.js'
+import {action_delay_quest, count_quest, action_start_delay, hit_action_path, mis_action_path, sound_action_path,
+    action_countdown_stop, action_countdown_start} from '../config.js'
 import {get_random_int_range} from "../scripts/random.js";
 import key_press_obj from "../key_press.js";
 import {max_data, min_data} from "../scripts/data_record.js";
+import "../howler.js"
 
 const key_num_dict = {
     'bt1': 1,
@@ -34,6 +36,7 @@ class Action {
         this.quest_start_time_ms = 0;            //Время начала квеста
         this.start_time_action = 0;             // Начала ативности
         this.passed_time = 0;                   // Время игры
+        this.sound_track = null;
         this.css_state_active = {
             "background-color": "#7bf57d",
             "border": "solid 1vh #2f2e2e",
@@ -276,7 +279,11 @@ class Action {
         const is_hit = this.check_hit(bt_num);
 
         if (is_hit) {
-            // Изменить счет:
+            // звук:
+            let sound = new Howl({
+                src: [hit_action_path], autoplay: true,
+            });
+                // Изменить счет:
             this.action_history.push({type: 'hit', wait_time: Date.now() - this.quest_start_time_ms})
             this.add_score(1);
             //Проверить условия конца:
@@ -289,6 +296,9 @@ class Action {
             }
         } else {
             this.action_history.push({type: 'miss', wait_time: Date.now() - this.quest_start_time_ms})
+            let sound = new Howl({
+                src: [mis_action_path], autoplay: true,
+            });
         }
     }
 
@@ -342,26 +352,27 @@ class Action {
     start_counting_down() {
         //Отсчет времени
         let self = this
-        let count_sec = action_start_delay/1000;
+        let count_sec = Math.ceil(action_start_delay/1000);
         $("#timer-start").text(count_sec);
+        let sound = new Howl({src: [action_countdown_stop], autoplay: true,});
         let start_counting_down_timer = setInterval(function () {
             count_sec -= 1;
-            if (count_sec <= 0) {
+            if (count_sec < 0) {
                 self.start_action();
                 $("#timer-start-box").hide();
                 clearInterval(start_counting_down_timer);
             } else {
-                if (count_sec <= 1) {
+                if (count_sec <= 0) {
                     $("#timer-start").text("GO");
+                    let sound = new Howl({src: [action_countdown_start], autoplay: true,});
                 } else {
                     $("#timer-start").text(count_sec);
                     $("#timer-start").css({"opacity": "0"});
                     $("#timer-start").animate({"opacity": "1"});
+                    let sound = new Howl({src: [action_countdown_stop], autoplay: true,});
                 }
-
             }
-        }, 1000)
-
+        }, 1000);
     }
 
     start() {
@@ -380,6 +391,16 @@ class Action {
         }, 63);
     }
 
+    start_sound_track() {
+        this.sound_track = new Howl({
+            src: [sound_action_path],
+            volume: 0.7,
+            loop: true,
+        });
+        console.log('play')
+        this.sound_track.play()
+    }
+
     start_action() {
         // Добавить событе на кнопку:
         key_press_obj.add_element('Action', (event)=>(this.handler_event_key(event)))
@@ -387,6 +408,7 @@ class Action {
         this.start_timer()
         // Ноавя цель:
         this.new_purpose();
+        this.start_sound_track();
     }
 
     get_statistics(is_win) {
@@ -404,6 +426,7 @@ class Action {
     }
     stop (statistics) {
         let self = this;
+        this.sound_track && this.sound_track.stop();
         key_press_obj.del_element('Action');
         self.interval_timer && clearInterval(self.interval_timer);
         self.interval_quest_end && clearInterval(self.interval_quest_end);
