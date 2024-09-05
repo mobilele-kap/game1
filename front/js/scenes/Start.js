@@ -18,9 +18,9 @@ class Start {
         $("#scene").html(
             `<div id="start">
                 <div id="start-container">
-                    <div id="start-logo">Дай Пас!</div>
+                    <div id="start-logo">Можно Пас!</div>
                     <div id="start-action-box">
-                        <marquee direction="left" scrollamount="10">${start_action_text}</marquee>
+                        <marquee direction="left" scrollamount="12">${start_action_text}</marquee>
                     </div>
                 </div>
             </div>`
@@ -48,7 +48,7 @@ class Start {
             "display": "flex",
             "justify-content": "center",
             "align-items": "center",
-            "margin-top": "61vh",
+            "margin-top": "65vh",
         });
         $("#start").css({
             "background-image": "url(js/scenes/img/fon.png)",

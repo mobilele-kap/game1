@@ -2,7 +2,7 @@ const action_delay_quest = 10000;  //мс, Разрешенное время м�
 const action_start_delay = 5000; //мс, Отсчет времени перед началом игры.
 const count_quest = 10; // Количество ударов до победы.
 const statistic_delay_exit = 15000 //мс, Время показа статистики.
-const start_action_text = "Возьмите клюшку и шайбу. Попадите шайбой в любой пассер и игра начнется."
+const start_action_text = "Попадите шайбой в любой пассер и игра начнется."
 // Музыка и звуки:
 const sounds_start_path = ['./js/scenes/sound/start_track1.mp3', './js/scenes/sound/start_track2.mp3', './js/scenes/sound/start_track3.mp3', './js/scenes/sound/start_track4.mp3']
 const hit_action_path = './js/scenes/sound/hit1.mp3';

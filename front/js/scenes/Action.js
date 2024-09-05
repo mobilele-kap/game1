@@ -38,12 +38,16 @@ class Action {
         this.passed_time = 0;                   // Время игры
         this.sound_track = null;
         this.css_state_active = {
-            "background-color": "#7bf57d",
-            "border": "solid 1vh #2f2e2e",
+            "background-color": "#FFFFFF",
+            "border-top": "1vh solid #FF0000",
+            "border-right": "1vh solid #FF0000",
+            "border-bottom": "1vh dashed #000000",
+            "border-left": "1vh solid #FF0000",
         }
         this.css_state_inactive = {
-            "background-color": "#FFD973",
-            "border": "solid 1vh #FF4040",
+            "background-color": "#CFCFCF",
+            "border": "solid 1vh #737373",
+
         }
     }
 
@@ -52,7 +56,7 @@ class Action {
         $("#scene").html(
             `<div id="action">
                 <div id="action-field-container">
-                    <div id="action-field-title"><span>Дай Пас!</span></div>
+                    <div id="action-field-title"><span>Можно Пас!</span></div>
                     <div id="action-field">
                         <div id="timer-start-box">
                             <span id="timer-start"></span>
@@ -118,7 +122,7 @@ class Action {
         $("#quest_time_box").css({
             "position": "absolute",
             "border-radius": "10vh 10vh 0 0",
-            "background-color": "red",
+            "background-color": "#0A295F",
             "height": "10vh",
             "width": "10vw",
             "z-index": "10",
@@ -143,7 +147,7 @@ class Action {
             "justify-content": "center",
             "height": "20vh",
             "width": "15vw",
-            "border": "solid 3px #d3c1c8",
+            "border": "solid 3px #FF3636",
             "border-radius": "2vh",
         });
         $("#score_container").css({
@@ -153,7 +157,7 @@ class Action {
             "justify-content": "center",
             "height": "20vh",
             "width": "15vw",
-            "border": "solid 3px #d3c1c8",
+            "border": "solid 3px #FF3636",
             "border-radius": "2vh",
         });
 
@@ -204,7 +208,7 @@ class Action {
         });
 
         $("#action").css({
-            "background-color": "red",
+            "background-color": "#0A295F",
             "width": "100vw",
             "height": "100vh",
             "display": "flex",
@@ -243,13 +247,13 @@ class Action {
         });
 
         $("#purpose_2").css({
-            "transform": "rotate(135deg)",
+            "transform": "rotate(-47deg)",
             "margin-right": "auto",
         });
-        $("#purpose_5").css({"transform": "rotate(45deg)"});
+        $("#purpose_5").css({"transform": "rotate(47deg)"});
 
         $("#purpose_1").css({
-            "transform": "rotate(90deg)",
+            "transform": "rotate(-90deg)",
             "position": "absolute",
             "left": "-6.8vw",
             "top": "24vh",
